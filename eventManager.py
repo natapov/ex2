@@ -6,25 +6,18 @@ import event_manager as EM
 #   orig_file_path: The path to the unfiltered subscription file
 #   filtered_file_path: The path to the new filtered file
 def fileCorrect(orig_file_path: str, filtered_file_path: str):
+    student_list = validStudentsList(orig_file_path)
+    out_file = open(filtered_file_path,"w")
+    out_file.write('\n'.join([', '.join(student_entry) for student_entry in student_list]))
+    out_file.close()
+
+def validStudentsList(orig_file_path: str) -> list:
     input_file = open(orig_file_path, "r")
     input_file_content = input_file.read()
     input_file.close()
     student_list = input_file_content.split('\n')
     student_list = [student_data.split(',') for student_data in student_list]
-    student_list = [[strip_string(data) for data in student_data] for student_data in student_list]
-    valid_students = [student for student in student_list if isStudentEntryValid(student)]
-    out_file = open(filtered_file_path,"w")
-    out_file.write('\n'.join([', '.join(student_entry) for student_entry in valid_students]))
-    out_file.close()
-
-def strip_string(string: str) -> str:
-    word_list = string.split()
-    return " ".join(word_list)
-
-def validStudentsList(input_string: str)->list:
-    student_list = input_string.split('\n')
-    student_list = [student_data.split(',') for student_data in student_list]
-    student_list = [[strip_string(data) for data in student_data] for student_data in student_list]
+    student_list = [[" ".join(data.split()) for data in student_data] for student_data in student_list]
     valid_students = [student for student in student_list if isStudentEntryValid(student)]
     return valid_students
 
@@ -50,10 +43,11 @@ def printYoungestStudents(in_file_path: str, out_file_path: str, k: int) -> int:
     if k < 0:
         return -1
     student_list = validStudentsList(in_file_path)
+    print(student_list)
     student_list.sort(key=lambda student_entry: student_entry[2] + student_entry[0])
     out_file = open(out_file_path, "w")
     for i in range(min(k, len(student_list))):
-        out_file.write(", ".join(student_list[i]))
+        out_file.write(student_list[i][1])
         out_file.write("\n")
     out_file.close()
     return min(k, len(student_list))
@@ -67,9 +61,9 @@ def correctAgeAvg(in_file_path: str, semester: int) -> float:
     if semester < 1:
         return -1
     student_list = validStudentsList(in_file_path)
-    if len(student_list) == 0:
+    age_list = [int(student_entry[2]) for student_entry in student_list if int(student_entry[4]) == semester]
+    if len(age_list) == 0:
         return 0
-    age_list = ([student_entry[2] for student_entry in student_list if student_entry[4] == semester])
     return sum(age_list) / len(age_list)
     
     
