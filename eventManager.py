@@ -10,6 +10,7 @@ def fileCorrect(orig_file_path: str, filtered_file_path: str):
     student_list.sort(key=lambda student: student[0])
     out_file = open(filtered_file_path,"w")
     out_file.write('\n'.join([', '.join(student_entry) for student_entry in student_list]))
+    out_file.write('\n')
     out_file.close()
 
 def validStudentsList(orig_file_path: str) -> list:
@@ -52,8 +53,6 @@ def printYoungestStudents(in_file_path: str, out_file_path: str, k: int) -> int:
         return -1
     student_list = validStudentsList(in_file_path)
     student_list.sort(key=lambda student_entry: int(student_entry[2] + student_entry[0]))
-    for line in student_list:
-        print(line)
     out_file = open(out_file_path, "w")
     for i in range(min(k, len(student_list))):
         out_file.write(student_list[i][1])
