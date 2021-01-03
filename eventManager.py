@@ -10,7 +10,8 @@ def fileCorrect(orig_file_path: str, filtered_file_path: str):
     student_list.sort(key=lambda student: student[0])
     out_file = open(filtered_file_path,"w")
     out_file.write('\n'.join([', '.join(student_entry) for student_entry in student_list]))
-    out_file.write('\n')
+    if student_list != []:
+        out_file.write('\n')
     out_file.close()
 
 def validStudentsList(orig_file_path: str) -> list:
