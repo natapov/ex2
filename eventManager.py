@@ -7,6 +7,7 @@ import event_manager as EM
 #   filtered_file_path: The path to the new filtered file
 def fileCorrect(orig_file_path: str, filtered_file_path: str):
     student_list = validStudentsList(orig_file_path)
+    student_list.sort(key=lambda student: student[0])
     out_file = open(filtered_file_path,"w")
     out_file.write('\n'.join([', '.join(student_entry) for student_entry in student_list]))
     out_file.close()
@@ -19,14 +20,21 @@ def validStudentsList(orig_file_path: str) -> list:
     student_list = [student_data.split(',') for student_data in student_list]
     student_list = [[" ".join(data.split()) for data in student_data] for student_data in student_list]
     valid_students = [student for student in student_list if isStudentEntryValid(student)]
-    return valid_students
+    id_list = []
+    unique_students = []
+    valid_students.reverse()
+    for student in valid_students:
+        if student[0] not in id_list:
+            unique_students.append(student)
+            id_list.append(student[0])
+    return unique_students
 
 def isStudentEntryValid(student_entry: list) -> bool:
     if student_entry[0].startswith('0') or not len(student_entry[0]) == 8:
         return False
     if not all([(char.isalpha() or char.isspace()) for char in student_entry[1]]):
         return False
-    if not (int(student_entry[2]) > 16 and int(student_entry[2]) < 120):
+    if not (int(student_entry[2]) >= 16 and int(student_entry[2]) <= 120):
         return False
     if not (2020 - int(student_entry[2])) == int(student_entry[3]):
         return False
@@ -40,11 +48,12 @@ def isStudentEntryValid(student_entry: list) -> bool:
 #   in_file_path: The path to the unfiltered subscription file
 #   out_file_path: file path of the output file
 def printYoungestStudents(in_file_path: str, out_file_path: str, k: int) -> int:
-    if k < 0:
+    if k <= 0:
         return -1
     student_list = validStudentsList(in_file_path)
-    print(student_list)
-    student_list.sort(key=lambda student_entry: student_entry[2] + student_entry[0])
+    student_list.sort(key=lambda student_entry: int(student_entry[2] + student_entry[0]))
+    for line in student_list:
+        print(line)
     out_file = open(out_file_path, "w")
     for i in range(min(k, len(student_list))):
         out_file.write(student_list[i][1])
@@ -73,9 +82,22 @@ def correctAgeAvg(in_file_path: str, semester: int) -> float:
 # print the events in the list "events" using the functions from hw1
 #   events: list of dictionaries
 #   file_path: file path of the output file
-def printEventsList(events :list,file_path :str): #em, event_names: list, event_id_list: list, day: int, month: int, year: int):
-    pass
-    #TODO   
+def printEventsList(events :list, file_path :str): #em, event_names: list, event_id_list: list, day: int, month: int, year: int):
+    dates = [event["date"] for event in events]
+    em = EM.createEventManager(findEarliestDate(dates))
+    for event in events:
+        EM.emAddEventByDate(em, event["name"], event["date"], event["id"])
+    EM.emPrintAllEvents(em, file_path)
+    return em
+
+
+def findEarliestDate(date_list):
+    earliest_date = date_list[0]
+    for date in date_list:
+        if EM.dateCompare(earliest_date, date) > 0:
+            earliest_date = date
+    return earliest_date
+
     
     
 def testPrintEventsList(file_path :str):
